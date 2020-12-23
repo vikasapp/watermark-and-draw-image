@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"image"
 	"image/draw"
 	"image/jpeg"
@@ -12,6 +13,7 @@ import (
 
 	"os"
 )
+
 // https://www.sanarias.com/blog/1214PlayingwithimagesinHTTPresponseingolang
 var root = flag.String("root", ".", "file system path")
 
@@ -26,32 +28,35 @@ func main() {
 }
 
 func drawImageHandler(w http.ResponseWriter, r *http.Request) {
-    image1,err := os.Open("images/master_banner.jpg")
-    if err != nil {
-        log.Fatalf("failed to open: %s", err)
-    }
-    
-    first, err := jpeg.Decode(image1)
-    if err != nil {
-        log.Fatalf("failed to decode: %s", err)
-    }
-    defer image1.Close()
+	image1, err := os.Open("images/master_banner.jpg")
+	if err != nil {
+		log.Fatalf("failed to open: %s", err)
+	}
 
-    image2,err := os.Open("images/PartsEazyLogo.jpeg")
-    if err != nil {
-        log.Fatalf("failed to open: %s", err)
-    }
-    second,err := jpeg.Decode(image2)
-    if err != nil {
-        log.Fatalf("failed to decode: %s", err)
-    }
-    defer image2.Close()
+	first, err := jpeg.Decode(image1)
+	if err != nil {
+		log.Fatalf("failed to decode: %s", err)
+	}
+	defer image1.Close()
 
-    offset := image.Pt(300, 200)
-    b := first.Bounds()
-    image3 := image.NewRGBA(b)
-    draw.Draw(image3, b, first, image.ZP, draw.Src)
-    draw.Draw(image3, second.Bounds().Add(offset), second, image.ZP, draw.Over)
+	image2, err := os.Open("images/PartsEazyLogo.jpeg")
+	if err != nil {
+		log.Fatalf("failed to open: %s", err)
+	}
+	second, err := jpeg.Decode(image2)
+	if err != nil {
+		log.Fatalf("failed to decode: %s", err)
+	}
+	defer image2.Close()
+
+	offset := image.Pt(250, 100)
+	b := first.Bounds()
+	// fmt.Println("Width:", b.Max.X, "Height:", b.Max.Y)
+	bounds := second.Bounds()
+	fmt.Println("Width:", bounds.Max.X, "Height:", bounds.Max.Y)
+	image3 := image.NewRGBA(b)
+	draw.Draw(image3, b, first, image.ZP, draw.Src)
+	draw.Draw(image3, second.Bounds().Add(offset), second, image.ZP, draw.Over)
 	var img image.Image = image3
 	writeImage(w, &img)
 }
